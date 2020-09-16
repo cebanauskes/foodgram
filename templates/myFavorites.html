@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Избранное</title>
+    {% load static %}
+    {% load static recipes_tags %}
+    <link rel="stylesheet" href="{% static 'pages/index.css' %}">
+</head>
+<body class="body">
+    {% include "navAuth.html" %}
+    {% csrf_token %}
+    <main class="main container">
+        <div class="main__header">
+            <h1 class="main__title">Избранное</h1>
+            <ul class="tags">
+                {% with filter_values=request.GET|get_filter_values %}
+                    {% for tag in tags %}
+                    <li class="tags__item">
+                        <a 
+                        id="{{ tag.value }}" 
+                        class="tags__checkbox tags__checkbox_style_{{tag.color}} 
+                        {% if tag.value in filter_values  %}tags__checkbox_active{% endif %}" 
+                        href="/my_favorites/?{{ request|get_filter_link:tag }}"
+                        ></a>
+                        <span class="tags__label">{{ tag.title }}</span>
+                    </li>
+                    {% endfor %}
+                {% endwith %}
+            </ul>
+
+        </div>
+        <div class="card-list">
+            {% for recipe in page %}
+            <div class="card" data-id="{{ recipe.id }}">
+                <a href="{% url 'recipes:single_recipe' recipe.author.username recipe.id %}" class="link" >
+                    <img src="{{ recipe.image.url }}" alt="Какой-то текст" class="card__image">
+                </a>
+                <div class="card__body">
+                    <a class="card__title link" href="{% url 'recipes:single_recipe' recipe.author.username recipe.id %}">{{ recipe.title }}</a>
+                    <ul class="card__items">
+                        {% for tag in recipe.tags.all %}
+                            {% if tag in tags %}
+                                <li class="card__item"><span class="badge badge_style_{{tag.color}}">{{ tag.title }}</span></li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                    <div class="card__items card__items_column">
+                        <p class="card__text"><span class="icon-time"></span> {{ recipe.duration }} мин.</p>
+                        <p class="card__text"><span class="icon-user"></span> 
+                            <a href="{% url 'recipes:profile' recipe.author.username %}" style="color: black">{{ recipe.author }}</a>
+                        </p>
+                    </div>
+                </div>
+                <div class="card__footer">
+                        {% if recipe.title in cart_list %}
+                            <button class="button button_style_light-blue" name="purchpurchases" ><span class="icon-plus button__icon"></span>
+                                Удалить из покупок
+                            </button>
+                        {% else%}
+                            <button class="button button_style_light-blue" name="purchpurchases" data-out><span class="icon-plus button__icon"></span>
+                                Добавить в покупки
+                            </button>
+                        {% endif %}
+                        {% if recipe.title in frecipe_titles %}
+                            <button class="button button_style_none" name="favorites"><span class="icon-favorite icon-favorite_active"></span></button>
+                        {% else %}
+                            <button class="button button_style_none" name="favorites" data-out><span class="icon-favorite"></span></button>
+                        {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            </div>
+            {% if page.has_other_pages %}
+                {% include "paginator.html" with items=page paginator=paginator %}
+            {% endif %}
+    </main>
+    {% include 'footer.html' %}
+    <script src="{% static 'js/config/config.js' %}"></script>
+
+    <script src="{% static 'js/components/MainCards.js' %}"></script>
+    <script src="{% static 'js/components/Purchpurachases.js' %}"></script>
+    <script src='{% static "js/components/Favorites.js" %}'></script>
+    <script src='{% static "js/components/CardList.js"%}'></script>
+    <script src="{% static 'js/components/Header.js'%}"></script>
+
+
+    <script src="{% static 'js/api/Api.js' %}"></script>
+    <script src='{% static "favorite.js" %}'></script>
+
+
+
+
+</body>
+</html>

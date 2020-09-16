@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Список покупок</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'pages/shopList.css' %}">
+</head>
+<body class="body">
+    {% include "navAuth.html" %}
+    {% csrf_token %}
+<main class="main container">
+    <div class="main__header">
+        <h1 class="main__title">Список покупок</h1>
+    </div>
+    <div class="card-list card-list_column">
+        <ul class="shopping-list">
+            {% for item in cart %}
+            <li class="shopping-list__item" data-id="{{item.recipe.id}}">
+                <div class="recipe recipe_reverse">
+                    <img src="{{ item.recipe.image.url }}" alt="{{item.recipe.title}}" class="recipe__image recipe__image_big">
+                    <h3 class="recipe__title">{{ item.recipe.title }}</h3>
+                    <p class="recipe__text"><span class="icon-time"></span> {{ item.recipe.duration }} мин.</p>
+                </div>
+                <a href="#" class="shopping-list__button link">Удалить</a>
+            </li>
+            {% endfor %}
+        </ul>
+        <a href="/download/" class="button button_style_blue">Скачать список</a>
+
+
+    </div>
+</main>
+{% include 'footer.html' %}
+
+<script src="{% static 'js/config/config.js' %}"></script>
+<script src='{% static "js/components/Header.js"%}'></script>
+<script src="{% static 'js/components/ShopList.js'%}"></script>
+<script src="{% static 'js/components/Header.js'%}"></script>
+<script src="{% static 'js/api/Api.js' %}"></script>
+<script src='{% static "ShopList.js" %}'></script>
+</body>
+</html>
