@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .models import Recipe, Tag, Ingredient, Amount, Favorite, Follow, Cart, User
+from .utils import ExportCsvMixin
 
 
 class AmountInLine(admin.TabularInline):
@@ -28,8 +29,10 @@ class RecipeAdmin(admin.ModelAdmin):
     readonly_fields = ('favorites_count',)
 
 
-class TagAdmin(admin.ModelAdmin):
+class TagAdmin(admin.ModelAdmin, ExportCsvMixin):
     list_display = ('pk','title',)
+    actions = ["export_as_csv"]
+        
 
 
 class IngredientAdmin(admin.ModelAdmin):
