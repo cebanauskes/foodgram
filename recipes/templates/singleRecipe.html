@@ -1,22 +1,10 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ recipe.title }}</title>
+{% extends 'base.html' %}
+{% block title %}{{ recipe.title }}{% endblock %}
     {% load static %}
-    {% csrf_token %}
+    {% block static %}
     <link rel="stylesheet" href="{% static 'pages/single.css' %}">
-</head>
-<body class="body">
-{% if user.is_authenticated %}
-        {% include 'navAuth.html' %}
-    {% else %}
-        {% include 'navNotAuth.html' %}
-    {% endif %}
-    <main class="main container">
+    {% endblock %}
+    {% block content %}
         <div class="single-card" data-id="{{ recipe.id }}" data-author="{{ profile.username }}">
             <img src="{{ recipe.image.url }}" alt="какой-то текст" class="single-card__image">
             <div class="single-card__info">
@@ -24,7 +12,7 @@
                     <h1 class="single-card__title">{{ recipe.title }}</h1>
                     <div class="single-card__favorite">
                         {% if user.is_authenticated %}
-                            {% if recipe.title in frecipe_titles %}
+                            {% if is_favorite %}
                             <button class="button button_style_none" name="favorites"><span class="icon-favorite icon-favorite_active"></span></button>
                             <div class="single-card__favorite-tooltip tooltip">Удалить из избранного</div>
                             {% else %}
@@ -46,12 +34,17 @@
                     <ul class="single-card__items">
                         <li class="single-card__item"><p class="single-card__text"><span class="icon-user"></span>{{ recipe.author.username }}</p></li>
                         {% if user == recipe.author %}
-                        <li class="single-card__item">  <a style="margin-left: 2.5em" href="{% url 'recipes:recipe_edit' recipe.author.username recipe.id %}" class="single-card__text">Редактировать рецепт</a></li>
+                        <li class="single-card__item">  
+                            <a 
+                            style="margin-left: 2.5em" 
+                            href="{% url 'recipes:recipe_edit' recipe.author.username recipe.id %}" 
+                            class="single-card__text"
+                            >Редактировать рецепт</a></li>
                         {% endif %}
                     </ul>
                 </div>
                 <ul class="single-card__items">
-                    {% if recipe.title in cart_list %}
+                    {% if recipe.id in cart_list %}
                     <li class="single-card__item"><button class="button button_style_blue" name="purchpurchases">Удалить из покупок</button>
                     {% else%}
                         <li class="single-card__item"><button class="button button_style_blue" name="purchpurchases" data-out><span class="icon-plus"></span> Добавить в покупки</button></li>
@@ -80,8 +73,7 @@
                 </div>
             </div>
         </div>
-    </main>
-    {% include 'footer.html' %}
+
     <script src="{% static 'js/config/config.js' %}"></script>
     <script src="{% static 'js/components/Purchpurachases.js' %}"></script>
     <script src='{% static "js/components/Favorites.js" %}'></script>
@@ -93,9 +85,4 @@
 
     <script src="{% static 'js/api/Api.js' %}"></script>
     <script src="{% static 'singlePage.js' %}"></script>
-
-
-
-
-</body>
-</html>
+{% endblock %}

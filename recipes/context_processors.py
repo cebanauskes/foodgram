@@ -2,7 +2,7 @@ from .models import Cart, Tag
 
 def counter(request):
     if request.user.is_authenticated:
-        return {"counter": Cart.objects.filter(user=request.user).all().count()}
+        return {"counter": Cart.objects.filter(user=request.user).count()}
     return {'counter': []}
 
 def check_cart(request):
@@ -10,9 +10,8 @@ def check_cart(request):
     if request.user.is_authenticated:
 
         cart = Cart.objects.filter(user=request.user).all()
+        cart_list = cart.values_list('recipe', flat=True)
 
-        for item in cart:
-            cart_list.append(item.recipe.title)
     return {'cart_list': cart_list}  
  
     
@@ -21,8 +20,8 @@ def get_tags(request):
     return {'tags': Tag.objects.all()}
 
 def url_filters(request):
-    result = ''
-    for item in request.GET.getlist('filters'):
-        result += f'&filters={item}'
-    return {'filters': result}
+    filters = request.GET.getlist('filters')
+    filters.insert(0, '')
+    filters = '&filters='.join(filters)
+    return {'filters': filters}
     

@@ -1,23 +1,16 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Список покупок</title>
-    {% load static %}
+{% extends 'base.html' %}
+{% block title %}Список покупок{% endblock %}
+    {% load static recipes_tags %}
+    {% block static %}
     <link rel="stylesheet" href="{% static 'pages/shopList.css' %}">
-</head>
-<body class="body">
-    {% include "navAuth.html" %}
-    {% csrf_token %}
-<main class="main container">
+    {% endblock %}
+    {% block content %}
     <div class="main__header">
         <h1 class="main__title">Список покупок</h1>
     </div>
     <div class="card-list card-list_column">
         <ul class="shopping-list">
+            {% csrf_token %}
             {% for item in cart %}
             <li class="shopping-list__item" data-id="{{item.recipe.id}}">
                 <div class="recipe recipe_reverse">
@@ -29,12 +22,10 @@
             </li>
             {% endfor %}
         </ul>
-        <a href="/download/" class="button button_style_blue">Скачать список</a>
+        <a href="{% url 'recipes:download' %}" class="button button_style_blue">Скачать список</a>
 
 
     </div>
-</main>
-{% include 'footer.html' %}
 
 <script src="{% static 'js/config/config.js' %}"></script>
 <script src='{% static "js/components/Header.js"%}'></script>
@@ -42,5 +33,4 @@
 <script src="{% static 'js/components/Header.js'%}"></script>
 <script src="{% static 'js/api/Api.js' %}"></script>
 <script src='{% static "ShopList.js" %}'></script>
-</body>
-</html>
+{% endblock %}

@@ -1,26 +1,19 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{ header }}</title>
+{% extends 'base.html' %}
+{% block title %}{{ header }}{% endblock %}
+    {% load static recipes_tags %}
     {% load user_filters %}
-    {% load static %}
-    {% load thumbnail %}
+    {% block static %}
     <link rel="stylesheet" href="{% static 'pages/form.css' %}">
-</head>
-<body class="body">
-    {% include "navAuth.html" %}
-<main class="main container">
+    {% endblock %}
+    {% block content %}
     <div class="main__header">
         <h1 class="main__title">{{ header }}</h1>
     </div>
     <div class="form-container">
+
         <form class="form" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
             <div class="form__group">
+                {% csrf_token %}
                 <label for="{{form.title.id_for_label}}" class="form__label">Название рецепта</label>
                 <div class="form__field-group">
                     {{form.title|addclass:"form__input"}}
@@ -111,13 +104,10 @@
     </div>
 
 
-</main>
-{% include 'footer.html' %}
 <script src="{% static 'js/config/config.js' %}"></script>
 
 <script src="{% static 'js/components/Header.js' %}"></script>
 <script src="{% static 'js/utils/debouncing.js' %}"></script>
 <script src="{% static 'js/api/Api.js' %}"></script>
 <script src="{% static 'formRecipe.js' %}"></script>
-</body>
-</html>
+{% endblock %}

@@ -8,43 +8,30 @@ import json
 
 from .forms import RecipeForm
 from .models import Amount, Cart, Follow, Favorite, Ingredient, Recipe, User, Follow 
+from .utils import get_ingredients, create_amount
 
 
 def index(request):
-    if 'filters' in request.GET:
-        filters = request.GET.getlist('filters')
-        recipe_list = Recipe.objects.filter(tags__value__in=filters).distinct()
+    filters = request.GET.getlist('filters')
+    if filters:
+        recipe_list = Recipe.objects.filter(
+            tags__value__in=filters).distinct()
     else:
-        recipe_list = Recipe.objects.order_by('-pub_date').all()
-    frecipe_titles = []
+        recipe_list = Recipe.objects.all()
+
+    frecipe_ids = []
 
     if request.user.is_authenticated:
         favor = Favorite.objects.filter(user=request.user).all()
-
-        for item in favor:
-            frecipe_titles.append(item.recipe.title)
+        frecipe_ids = favor.values_list('recipe', flat=True)
 
     paginator = Paginator(recipe_list, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    return render(request, 'index.html', {'recipe_list': recipe_list,  'page': page,
-                                            'paginator': paginator, 'frecipe_titles': frecipe_titles, })
-
-def get_ingredients(request):
-    ing_dict = {}
-    for key in request.POST:
-        if key.startswith('nameIngredient'):
-            value = key[15:]
-            ing_dict[request.POST[key]] = request.POST['valueIngredient_' + value]
-    return ing_dict
-
-def create_amount(ing_dict, recipe):
-    for key in ing_dict:
-        Amount.objects.create(
-            quantity=ing_dict[key],
-            ingredient=Ingredient.objects.get(title=key),
-            recipe=recipe,
-        )
+    return render(request, 'index.html', {'recipe_list': recipe_list, 
+                                            'page': page,
+                                            'paginator': paginator, 
+                                            'frecipe_ids': frecipe_ids, })
 
 @login_required
 def new_recipe(request):
@@ -52,7 +39,6 @@ def new_recipe(request):
     header = 'Создание рецепта'
     button = 'Создать рецепт'
     if request.method == 'POST':
-        print(request.POST)
         form = RecipeForm(request.POST or None, files=request.FILES or None)
 
         if form.is_valid():
@@ -64,7 +50,8 @@ def new_recipe(request):
             return redirect('recipes:index')
 
     form = RecipeForm()
-    return render(request, 'RecipeNew.html', {'form': form, 'header':header, 'button': button})
+    return render(request, 'RecipeNew.html', {'form': form, 'header':header,
+                                              'button': button, })
 
 def recipe_edit(request, username, recipe_id):
     profile = get_object_or_404(User, username=username)
@@ -73,10 +60,12 @@ def recipe_edit(request, username, recipe_id):
     header = 'Редактирование рецепта'
     button = 'Сохранить'
     if request.user != profile:
-        return redirect('recipes:single_recipe', username=username, recipe_id=recipe_id)
+        return redirect(
+            'recipes:single_recipe', username=username, recipe_id=recipe_id)
 
     if request.method == 'POST':
-        form = RecipeForm(request.POST or None, files=request.FILES or None, instance=recipe)
+        form = RecipeForm(
+            request.POST or None, files=request.FILES or None, instance=recipe)
 
         if form.is_valid():
             recipe=form.save(commit=False)
@@ -84,13 +73,14 @@ def recipe_edit(request, username, recipe_id):
             recipe.save()
             create_amount(ing_dict, recipe)
             form.save_m2m()
-            return redirect('recipes:single_recipe', username=username, recipe_id=recipe_id)
+            return redirect(
+                'recipes:single_recipe', username=username, recipe_id=recipe_id)
 
     form = RecipeForm(instance=recipe)
     for tag in recipe.tags.all():
         form.instance.tags.add(tag)
-    return render(request, 'RecipeNew.html', {'form': form, 'header':header, 'button': button, 'recipe': recipe})
-
+    return render(request, 'recipeNew.html', {'form': form, 'header':header,
+                                              'button': button, 'recipe': recipe})
 
 @login_required
 def recipe_delete(request, username, recipe_id):
@@ -99,50 +89,52 @@ def recipe_delete(request, username, recipe_id):
         recipe.delete()
     return redirect('recipes:index')
 
-
-
 def single_recipe(request, username, recipe_id):
     recipe = get_object_or_404(Recipe, id=recipe_id)
     profile = get_object_or_404(User, username=username)
     is_follow = None
-    frecipe_titles = []
+    is_favorite = None
 
     if request.user.is_authenticated:
-        favor = Favorite.objects.filter(user=request.user).all()
-        is_follow = Follow.objects.filter(user=request.user, author=profile)
+        is_favorite = Favorite.objects.filter(
+            user=request.user, recipe=recipe).exists()
+        is_follow = Follow.objects.filter(
+            user=request.user, author=profile).exists()
 
-        for item in favor:
-            frecipe_titles.append(item.recipe.title)
-
-    return render(request, 'singleRecipe.html', {'recipe': recipe, 'profile': profile, 
-                                                'is_follow': is_follow, 'frecipe_titles': frecipe_titles })
-
+    return render(request, 'singleRecipe.html', {'recipe': recipe, 
+                                                 'profile': profile, 
+                                                 'is_follow': is_follow,
+                                                 'is_favorite': is_favorite })
 
 def profile(request, username):
 
     profile = get_object_or_404(User, username=username)
     is_follow = None
-    frecipe_titles = []
+    frecipe_ids = []
 
     if request.user.is_authenticated:
-        favor = Favorite.objects.filter(user=request.user).all()
-        
-        for item in favor:
-            frecipe_titles.append(item.recipe.title)
+        favor = profile.favorites.all()
+        frecipe_ids = favor.values_list('recipe', flat=True)
 
-        is_follow = Follow.objects.filter(user=request.user, author=profile)
+        is_follow = Follow.objects.filter(
+            user=request.user, author=profile).exists()
 
-    if 'filters' in request.GET:
-        filters = request.GET.getlist('filters')
-        recipe_list = Recipe.objects.filter(tags__value__in=filters, author=profile).order_by('-pub_date').distinct()
+    filters = request.GET.getlist('filters')
+    
+    if filters:
+        recipe_list = Recipe.objects.filter(
+            tags__value__in=filters, author=profile).distinct()
     else:
-        recipe_list = Recipe.objects.filter(author=profile).order_by('-pub_date').all()
+        recipe_list = Recipe.objects.filter(author=profile).all()
         
     paginator = Paginator(recipe_list, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
-    return render(request, 'profile.html', {'page': page, 'paginator': paginator, 'frecipe_titles': frecipe_titles,
-                                             'profile': profile, 'is_follow': is_follow, })
+    return render(request, 'profile.html', {'page': page,
+                                            'paginator': paginator,
+                                            'frecipe_ids': frecipe_ids,
+                                            'profile': profile,
+                                            'is_follow': is_follow, })
 
 @login_required
 def my_follow(request):
@@ -150,58 +142,54 @@ def my_follow(request):
     recipe_list = []
 
     for fitem in sub_list:
-        i = 0
-
-        for item in fitem.author.recipe.all():
-            recipe_list.append(item)
-            i += 1
-
-            if i == 3:
-                break
+        recipe_list.extend(fitem.author.recipes.all()[:3:])
 
     paginator = Paginator(sub_list, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
 
-    return render(request, 'myFollow.html', {'page': page, 'recipe_list': recipe_list})
+    return render(request, 'myFollow.html', {'page': page,
+                                             'recipe_list': recipe_list})
 
 @login_required
 def favorites_view(request):
-    favorite_list = Favorite.objects.filter(user=request.user)
+    filters = request.GET.getlist('filters')
+
+    if filters:
+        favorite_list = Favorite.objects.filter(
+            user=request.user, recipe__tags__value__in=filters
+            ).select_related('recipe').distinct().all()
+    else:
+        favorite_list = Favorite.objects.filter(
+            user=request.user).select_related('recipe').all()
+
+    frecipe_ids = favorite_list.values_list('recipe', flat=True)
     recipe_list = []
-    frecipe_titles = []
-    
-    if 'filters' in request.GET:
-        filters = request.GET.getlist('filters')
 
     for item in favorite_list:
-        if 'filters' in request.GET:
-            for tag in item.recipe.tags.all():
-                if tag.value in filters:
-                    recipe_list.append(item.recipe)
-        else:
-            recipe_list.append(item.recipe)
-        frecipe_titles.append(item.recipe.title)
+        recipe_list.append(item.recipe)
 
     paginator = Paginator(recipe_list, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
 
-    return render(request, 'myFavorites.html', {'page': page, 'paginator': paginator, 
-                                                'frecipe_titles': frecipe_titles})
+    return render(request, 'myFavorites.html', {'page': page,
+                                                'paginator': paginator, 
+                                                'frecipe_ids': frecipe_ids})
 
 @login_required
 def cart_view(request):
     cart = Cart.objects.filter(user=request.user).all()
     return render(request, 'shopList.html', {'cart': cart})
 
+@login_required
 def download(request):
     cart = Cart.objects.filter(user=request.user).all()
     ingredients_dict = {}
 
     for item in cart:
 
-        for amount in item.recipe.amount.all():
+        for amount in item.recipe.amounts.all():
 
             title = f'{amount.ingredient.title} {amount.ingredient.dimension}'
             quantity = amount.quantity
@@ -222,7 +210,7 @@ def download(request):
     
 @login_required
 def ingredient_hints(request):
-    text = request.GET.__getitem__('query')
+    text = request.GET['query']
     ing_list = Ingredient.objects.filter(title__startswith=text).order_by('title')
     result = [{"title": item.title, "dimension": item.dimension} for item in ing_list]
     return JsonResponse(result, safe=False)
@@ -235,19 +223,20 @@ class FollowApi(LoginRequiredMixin, View):
         username = json.loads(request.body)['id']
         follow = get_object_or_404(User, username=username)
         follower = get_object_or_404(User, username=request.user.username)
-        favorite_object = Follow.objects.filter(user=follower, author=follow).count()
+        favorite_object = Follow.objects.filter(
+            user=follower, author=follow).exists()
 
         if not favorite_object and follow != follower:
             Follow.objects.create(user=follower, author=follow)
-            return JsonResponse({'Success':'True'})
+            return JsonResponse({'success':'True'})
         else:
-            return JsonResponse({'Success':'False'})
+            return JsonResponse({'success':'False'})
 
     def delete(self, request, username):
         follow = get_object_or_404(User, username=username)
         follower = get_object_or_404(User, username=request.user.username)
         Follow.objects.filter(user=follower, author=follow).delete()
-        return JsonResponse({'Success':'True'})
+        return JsonResponse({'success':'True'})
 
 
 class FavoritesApi(LoginRequiredMixin, View):
@@ -255,18 +244,19 @@ class FavoritesApi(LoginRequiredMixin, View):
     def post(self, request):
         recipe_id = json.loads(request.body)['id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        is_favorite = Favorite.objects.filter(user=request.user, recipe=recipe)
+        is_favorite = Favorite.objects.filter(
+            user=request.user, recipe=recipe).exists()
 
         if is_favorite:
-            return JsonResponse({'Success':'False'})
+            return JsonResponse({'success':'False'})
         else:
             Favorite.objects.create(user=request.user, recipe=recipe)
-            return JsonResponse({'Success':'True'})
+            return JsonResponse({'success':'True'})
 
     def delete(self, request, recipe_id):
         recipe = get_object_or_404(Recipe, id=recipe_id)
         Favorite.objects.filter(user=request.user, recipe=recipe).delete()
-        return JsonResponse({'Success':'True'})
+        return JsonResponse({'success':'True'})
 
 
 class CartApi(LoginRequiredMixin, View):
@@ -274,18 +264,19 @@ class CartApi(LoginRequiredMixin, View):
     def post(self, request):
         recipe_id = json.loads(request.body)['id']
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        is_in_cart = Cart.objects.filter(user=request.user, recipe=recipe)
+        is_in_cart = Cart.objects.filter(
+            user=request.user, recipe=recipe).exists()
 
         if is_in_cart:
-            return JsonResponse({'Success':'False'})
+            return JsonResponse({'success':'False'})
         else:
             Cart.objects.create(user=request.user, recipe=recipe)
-            return JsonResponse({'Success':'True'})
+            return JsonResponse({'success':'True'})
 
     def delete(self, request, recipe_id):
         recipe = get_object_or_404(Recipe, id=recipe_id)
         Cart.objects.filter(user=request.user, recipe=recipe).delete()
-        return JsonResponse({'Success':'True'})
+        return JsonResponse({'success':'True'})
 
 
 

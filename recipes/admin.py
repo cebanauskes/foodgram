@@ -15,7 +15,7 @@ class UserAdmin(BaseUserAdmin):
 class RecipeAdmin(admin.ModelAdmin):
 
     def favorites_count(self, obj):
-        favorite = Favorite.objects.filter(recipe=obj).all().count()
+        favorite = Favorite.objects.filter(recipe=obj).count()
         return favorite
     
     favorites_count.short_description = 'Количество добавлений в избранное'

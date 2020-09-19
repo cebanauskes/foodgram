@@ -1,27 +1,19 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Мои подписки</title>
-    {% load static %}
-    {% csrf_token %}
-    <link rel="stylesheet" href="{% static 'pages/myFollow.css' %}">
-</head>
-<body class="body">
-    {% include "navAuth.html" %}
-<main class="main container">
+{% extends 'base.html' %}
+{% block title %}Мои подписки{% endblock %}
+{% load static %}
+{% block static %}
+<link rel="stylesheet" href="{% static 'pages/myFollow.css' %}">
+{% endblock %}
+    {% block content %}
     <div class="main__header">
         <h1 class="main__title">Мои подписки</h1>
     </div>
-
+    {% csrf_token %}
     <div class="card-list">
         {% for item in page %}
         <div class="card-user" data-author="{{user.username}}">
         <div class="card-user__header">
-            <h2 class="card-user__title">{{item.author.get_full_name}}</h2>
+            <h2 class="card-user__title">{{ item.author.get_full_name }}</h2>
         </div>
         <div class="card-user__body">
             <ul class="card-user__items">
@@ -51,8 +43,7 @@
     {% if page.has_other_pages %}
     {% include "paginator.html" with items=page paginator=paginator %}
     {% endif %}
-</main>
-{% include 'footer.html' %}
+
 
 <script src="{% static 'js/config/config.js' %}"></script>
 
@@ -63,6 +54,4 @@
 
 <script src="{% static 'js/api/Api.js' %}"></script>
 <script src='{% static "myFollow.js" %}'></script>
-
-</body>
-</html>
+{% endblock %}
