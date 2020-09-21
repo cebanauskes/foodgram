@@ -1,5 +1,6 @@
 from django import template
 from django.http import QueryDict
+from django.contrib.auth.decorators import login_required
 
 from recipes.models import Cart, Favorite
 
