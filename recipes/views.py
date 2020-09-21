@@ -1,10 +1,11 @@
+import json
+
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import View
-import json
 
 from .forms import RecipeForm
 from .models import Amount, Cart, Follow, Favorite, Ingredient, Recipe, User, Follow 
@@ -18,13 +19,14 @@ def index(request):
             tags__value__in=filters).distinct()
     else:
         recipe_list = Recipe.objects.all()
+    
 
     paginator = Paginator(recipe_list, 6)
     page_number = request.GET.get('page')
     page = paginator.get_page(page_number)
     return render(request, 'index.html', {'recipe_list': recipe_list, 
                                             'page': page,
-                                            'paginator': paginator, })
+                                            'paginator': paginator,})
 
 @login_required
 def new_recipe(request):
@@ -102,6 +104,7 @@ def single_recipe(request, username, recipe_id):
 def profile(request, username):
 
     profile = get_object_or_404(User, username=username)
+    filters = request.GET.getlist('filters')
     is_follow = None
 
     if request.user.is_authenticated:
@@ -109,13 +112,11 @@ def profile(request, username):
         is_follow = Follow.objects.filter(
             user=request.user, author=profile).exists()
 
-    filters = request.GET.getlist('filters')
-    
+    recipe_list = Recipe.objects.filter(author=profile).all()
+
     if filters:
-        recipe_list = Recipe.objects.filter(
-            tags__value__in=filters, author=profile).distinct()
-    else:
-        recipe_list = Recipe.objects.filter(author=profile).all()
+        recipe_list = recipe_list.filter(
+            tags__value__in=filters).distinct().all()
         
     paginator = Paginator(recipe_list, 6)
     page_number = request.GET.get('page')
@@ -145,12 +146,11 @@ def my_follow(request):
 def favorites_view(request):
     filters = request.GET.getlist('filters')
 
+    recipe_list = Recipe.objects.filter(favorites__user=request.user).distinct().all()
+
     if filters:
-        recipe_list = Recipe.objects.filter(
-            favorites__user=request.user, tags__value__in=filters).distinct().all()
-    else:
-        recipe_list = Recipe.objects.filter(
-            favorites__user=request.user).all()
+        recipe_list = recipe_list.filter(tags__value__in=filters).distinct().all()
+
 
     paginator = Paginator(recipe_list, 6)
     page_number = request.GET.get('page')
@@ -212,8 +212,12 @@ class FollowApi(LoginRequiredMixin, View):
     def delete(self, request, username):
         follow = get_object_or_404(User, username=username)
         follower = get_object_or_404(User, username=request.user.username)
-        Follow.objects.filter(user=follower, author=follow).delete()
-        return JsonResponse({'success':True})
+        obj = Follow.objects.filter(user=follower, author=follow).delete()
+        if obj[0] > 0:
+            return JsonResponse({'success':True})
+        else:
+            return JsonResponse({'success':False})
+
 
 
 class FavoritesApi(LoginRequiredMixin, View):
@@ -228,8 +232,11 @@ class FavoritesApi(LoginRequiredMixin, View):
 
     def delete(self, request, recipe_id):
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        Favorite.objects.filter(user=request.user, recipe=recipe).delete()
-        return JsonResponse({'success':True})
+        obj = Favorite.objects.filter(user=request.user, recipe=recipe).delete()
+        if obj[0] > 0:
+            return JsonResponse({'success':True})
+        else:
+            return JsonResponse({'success':False})
 
 
 class CartApi(LoginRequiredMixin, View):
@@ -243,6 +250,9 @@ class CartApi(LoginRequiredMixin, View):
 
     def delete(self, request, recipe_id):
         recipe = get_object_or_404(Recipe, id=recipe_id)
-        Cart.objects.filter(user=request.user, recipe=recipe).delete()
-        return JsonResponse({'success':True})
+        obj = Cart.objects.filter(user=request.user, recipe=recipe).delete()
+        if obj[0] > 0:
+            return JsonResponse({'success':True})
+        else:
+            return JsonResponse({'success':False})
 

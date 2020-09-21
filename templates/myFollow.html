@@ -11,7 +11,7 @@
     {% csrf_token %}
     <div class="card-list">
         {% for item in page %}
-        <div class="card-user" data-author="{{user.username}}">
+        <div class="card-user" data-author="{{ user.username }}">
         <div class="card-user__header">
             <h2 class="card-user__title">{{ item.author.get_full_name }}</h2>
         </div>
