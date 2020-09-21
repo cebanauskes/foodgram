@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-from .views import FavoritesApi, FollowApi, CartApi
+# from .views import FavoritesApi, FollowApi, CartApi
 
 app_name = "recipes"
 
@@ -13,12 +13,12 @@ urlpatterns = [
     path('cart/', views.cart_view, name='cart_view'),
     path('download/', views.download, name='download'),
 
-    path('api/favorites', FavoritesApi.as_view(), name='favorites_add'),
-    path('api/favorites/<int:recipe_id>', FavoritesApi.as_view(), name='favorites_delete'),
-    path('api/subscriptions', FollowApi.as_view(), name='subscriptions_add'),
-    path('api/subscriptions/<username>', FollowApi.as_view(), name='subsriptions_delete'),
-    path('api/purchases', CartApi.as_view(), name='purchases_add'),
-    path('api/purchases/<int:recipe_id>', CartApi.as_view(), name='purchases_delete'),
+    path('api/favorites', views.FavoritesApi.as_view(), name='favorites_add'),
+    path('api/favorites/<int:recipe_id>', views.FavoritesApi.as_view(), name='favorites_delete'),
+    path('api/subscriptions', views.FollowApi.as_view(), name='subscriptions_add'),
+    path('api/subscriptions/<username>', views.FollowApi.as_view(), name='subsriptions_delete'),
+    path('api/purchases', views.CartApi.as_view(), name='purchases_add'),
+    path('api/purchases/<int:recipe_id>', views.CartApi.as_view(), name='purchases_delete'),
     path('api/ingredients', views.ingredient_hints, name='ingredient_hints'),
 
     path('<username>/', views.profile, name='profile'),

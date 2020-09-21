@@ -1,6 +1,8 @@
 from django import template
 from django.http import QueryDict
 
+from recipes.models import Cart, Favorite
+
 register = template.Library()
 
 
@@ -21,4 +23,12 @@ def get_filter_link(request, tag):
     
     return new_request.urlencode()
 
+@register.filter(name='is_in_cart')
+def is_in_cart(recipe, user):
+    check = Cart.objects.filter(user=user, recipe=recipe).exists()
+    return check
 
+@register.filter(name='is_in_favorites')
+def is_in_favorites(recipe, user):
+    check = Favorite.objects.filter(user=user, recipe=recipe).exists()
+    return check

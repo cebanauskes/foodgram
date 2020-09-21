@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}{{ recipe.title }}{% endblock %}
+    {% load static recipes_tags %}
     {% load static %}
     {% block static %}
     <link rel="stylesheet" href="{% static 'pages/single.css' %}">
@@ -12,7 +13,7 @@
                     <h1 class="single-card__title">{{ recipe.title }}</h1>
                     <div class="single-card__favorite">
                         {% if user.is_authenticated %}
-                            {% if is_favorite %}
+                            {% if recipe|is_in_favorites:user %}
                             <button class="button button_style_none" name="favorites"><span class="icon-favorite icon-favorite_active"></span></button>
                             <div class="single-card__favorite-tooltip tooltip">Удалить из избранного</div>
                             {% else %}
@@ -44,7 +45,7 @@
                     </ul>
                 </div>
                 <ul class="single-card__items">
-                    {% if recipe.id in cart_list %}
+                    {% if recipe|is_in_cart:user %}
                     <li class="single-card__item"><button class="button button_style_blue" name="purchpurchases">Удалить из покупок</button>
                     {% else%}
                         <li class="single-card__item"><button class="button button_style_blue" name="purchpurchases" data-out><span class="icon-plus"></span> Добавить в покупки</button></li>
@@ -62,7 +63,7 @@
                 <div class="single-card__section">
                     <h3 class="single-card__section-title">Ингредиенты:</h3>
                     <div class="single-card__items single-card__items_column">
-                        {% for amount in recipe.amount.all %}
+                        {% for amount in recipe.amounts.all %}
                         <p class=" single-card__section-item">{{ amount.ingredient.title }} - {{ amount.quantity }} {{ amount.ingredient.dimension }}</p>
                         {% endfor %}
                     </div>

@@ -12,11 +12,10 @@ def get_ingredients(apps, schema_editor):
     try:
         obj_list = [
             Ingredient( 
-                id = id,
-                name = row[0],
-                dimension = 'г' if row[1] == '' else row[1],
+                name=row[0],
+                dimension='г' if row[1] == '' else row[1],
             )
-            for id, row in enumerate(data)
+            for row in list(data)
         ]
     except (IndexError):
         return 'IndexError'
@@ -37,12 +36,9 @@ def get_tags(apps, schema_editor):
     try:
         obj_list = [
             Tag( 
-                id = id,
-                value = row[0],
-                style = row[1],
-                name = row[2],
+                *row
             )
-            for id, row in enumerate(data)
+            for row in list(data)
         ]
     except (IndexError):
         return 'IndexError'

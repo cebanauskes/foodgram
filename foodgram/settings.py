@@ -70,7 +70,6 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'recipes.context_processors.counter',
-                'recipes.context_processors.check_cart',
                 'recipes.context_processors.get_tags',
                 'recipes.context_processors.url_filters'
             ],

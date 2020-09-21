@@ -49,6 +49,7 @@ class AmountAdmin(admin.ModelAdmin):
 class FavoriteAdmin(admin.ModelAdmin):
     fields = ('recipe', 'user')
     search_fields = ('recipe', 'user')
+    list_filter = ('user', )
 
 
 class FollowAdmin(admin.ModelAdmin):

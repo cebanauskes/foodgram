@@ -1,3 +1,4 @@
+{% load static recipes_tags %}
 <div class="card" data-id="{{ recipe.id }}">
     <a href="{% url 'recipes:single_recipe' recipe.author.username recipe.id %}" class="link" >
         <img src="{{ recipe.image.url }}" alt="Какой-то текст" class="card__image">
@@ -18,12 +19,12 @@
     </div>
     <div class="card__footer">
         {% if user.is_authenticated %}
-            {% if recipe.id in cart_list %}
+            {% if recipe|is_in_cart:user %}
                 <button class="button button_style_light-blue" name="purchpurchases" ><span class="icon-plus button__icon"></span>Удалить из покупок</button>
             {% else%}
                 <button class="button button_style_light-blue" name="purchpurchases" data-out><span class="icon-plus button__icon"></span>Добавить в покупки</button>
             {% endif %}
-            {% if recipe.id in frecipe_ids %}
+            {% if recipe|is_in_favorites:user %}
                 <button class="button button_style_none" name="favorites"><span class="icon-favorite icon-favorite_active"></span></button>
             {% else %}
                 <button class="button button_style_none" name="favorites" data-out><span class="icon-favorite"></span></button>
