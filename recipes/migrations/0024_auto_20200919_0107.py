@@ -12,7 +12,7 @@ def get_ingredients(apps, schema_editor):
     try:
         obj_list = [
             Ingredient( 
-                name=row[0],
+                title=row[0],
                 dimension='г' if row[1] == '' else row[1],
             )
             for row in list(data)
@@ -36,7 +36,9 @@ def get_tags(apps, schema_editor):
     try:
         obj_list = [
             Tag( 
-                *row
+                title = row[1],
+                color = row[2],
+                value = row[3],
             )
             for row in list(data)
         ]

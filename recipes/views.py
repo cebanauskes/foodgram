@@ -45,7 +45,7 @@ def new_recipe(request):
             return redirect('recipes:index')
 
     form = RecipeForm()
-    return render(request, 'RecipeNew.html', {'form': form, 'header':header,
+    return render(request, 'recipeNew.html', {'form': form, 'header':header,
                                               'button': button, })
 
 def recipe_edit(request, username, recipe_id):
@@ -112,7 +112,7 @@ def profile(request, username):
         is_follow = Follow.objects.filter(
             user=request.user, author=profile).exists()
 
-    recipe_list = Recipe.objects.filter(author=profile).all()
+    recipe_list = Recipe.objects.filter(author=profile)
 
     if filters:
         recipe_list = recipe_list.filter(
@@ -149,7 +149,7 @@ def favorites_view(request):
     recipe_list = Recipe.objects.filter(favorites__user=request.user).distinct().all()
 
     if filters:
-        recipe_list = recipe_list.filter(tags__value__in=filters).distinct().all()
+        recipe_list = recipe_list.filter(tags__value__in=filters)
 
 
     paginator = Paginator(recipe_list, 6)
@@ -197,6 +197,8 @@ def ingredient_hints(request):
     result = [{"title": item.title, "dimension": item.dimension} for item in ing_list]
     return JsonResponse(result, safe=False)
 
+def page_not_found(request, exception):
+    return render(request, 'misc/404.html', {'path': request.path}, status=404)
 
 class FollowApi(LoginRequiredMixin, View):
 

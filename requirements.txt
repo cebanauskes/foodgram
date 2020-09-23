@@ -17,6 +17,7 @@ PyJWT==1.7.1
 pylint==2.5.0
 pylint-django==2.0.15
 pylint-plugin-utils==0.6
+pytz==2020.1
 requests==2.23.0
 sqlparse==0.3.0
 sorl-thumbnail==12.6.3           
