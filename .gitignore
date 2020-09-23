@@ -129,5 +129,4 @@ dmypy.json
 .pyre/
 
 # My folders
-static/admin
 media/
