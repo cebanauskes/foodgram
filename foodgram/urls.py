@@ -32,8 +32,8 @@ urlpatterns = [
 
 
 urlpatterns += [
-    path('about/about-author/', views.flatpage,  {'url': 'about-author/'}, name='about-author'),
-    path('about/technologies/', views.flatpage, {'url': 'technologies/'}, name='technologies')
+    path('about/about-author/', views.flatpage,  {'url': '/about/about-author/'}, name='about-author'),
+    path('about/technologies/', views.flatpage, {'url': '/about/technologies/'}, name='technologies')
 ]
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

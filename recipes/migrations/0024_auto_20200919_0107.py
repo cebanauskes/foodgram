@@ -28,30 +28,6 @@ def delete_ingredients(apps, schema_editor):
     Ingredient.objects.all().delete()
 
 
-def get_tags(apps, schema_editor):
-    Tag = apps.get_model('recipes', 'Tag')
-    
-    csv_file=os.path.join('tags.csv')
-    data = csv.reader(open(csv_file, encoding='utf-8'), delimiter = ',')
-    try:
-        obj_list = [
-            Tag( 
-                title = row[1],
-                color = row[2],
-                value = row[3],
-            )
-            for row in list(data)
-        ]
-    except (IndexError):
-        return 'IndexError'
-
-    Tag.objects.bulk_create(obj_list)
-
-
-def delete_tags(apps, schema_editor):
-    Tag = apps.get_model('recipes', 'Tag')
-    Tag.objects.all().delete()
-
 
 class Migration(migrations.Migration):
 
@@ -61,5 +37,4 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.RunPython(get_ingredients, reverse_code=delete_ingredients),
-        migrations.RunPython(get_tags, reverse_code=delete_tags),
     ]
