@@ -2,5 +2,5 @@ location /static/ {
         root /home/app/web;
     }
     location /media/ {
-        root /home/app/web/;
+        root /home/app/web;
     }

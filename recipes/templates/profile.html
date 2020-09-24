@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Рецепты{% endblock %}
+    {%load static %}
     {% load static recipes_tags %}
     {% block content %}
-    {% load static recipes_tags %}
         {% csrf_token %}
         <div class="main__header">
             <h1 class="main__title">{{ profile.get_username }}</h1>
@@ -51,10 +51,10 @@
     <script src="{% static 'js/components/MainCards.js' %}"></script>
     <script src="{% static 'js/components/Purchpurachases.js' %}"></script>
     <script src='{% static "js/components/Favorites.js" %}'></script>
-    <script src='{% static "js/components/AuthorRecipe.js"%}'></script>
+    <script src='{% static "js/components/authorRecipe.js"%}'></script>
     <script src="{% static 'js/components/Subscribe.js'%}"></script>
     <script src="{% static 'js/components/Header.js'%}"></script>
 
     <script src="{% static 'js/api/Api.js' %}"></script>
-    <script src='{% static "AuthorRecipe.js" %}'></script>
+    <script src='{% static "authorRecipe.js" %}'></script>
 {% endblock %}
