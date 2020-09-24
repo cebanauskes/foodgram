@@ -1,2 +1,1 @@
-# foodgram-project
-foodgram-project
+IP сервера http://84.201.145.85/
