@@ -32,7 +32,7 @@ def delete_ingredients(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('recipes', '0001_initial'),
+        ('recipes', '0023_auto_20200918_2018'),
     ]
 
     operations = [

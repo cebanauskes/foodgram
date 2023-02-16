@@ -43,9 +43,8 @@ def new_recipe(request):
             create_amount(ing_dict, recipe)
             form.save_m2m()
             return redirect('recipes:index')
-
     form = RecipeForm()
-    return render(request, 'recipeNew.html', {'form': form, 'header':header,
+    return render(request, 'RecipeNew.html', {'form': form, 'header':header,
                                               'button': button, })
 
 def recipe_edit(request, username, recipe_id):
