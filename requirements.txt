@@ -20,7 +20,7 @@ pytz==2020.1
 requests==2.23.0
 sqlparse==0.3.0
 sorl-thumbnail==12.6.3           
-urllib3==1.25.6           
+urllib3==1.25.8           
 wcwidth==0.1.8            
 zipp==2.2.0
 
